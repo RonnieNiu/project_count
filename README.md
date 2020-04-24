@@ -6,6 +6,7 @@ The project_count.py allows you list all script files under project,and Calculat
 Usage(can run in windos or linux):
 
 the script Receive two parameters: you project path(ex:/path/project1),script extension(.py)
+
 Ex:python project_count.py /opt/Nhids .py
 
 the reuslt as follow:
