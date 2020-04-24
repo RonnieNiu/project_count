@@ -30,6 +30,7 @@ The /opt/Nhids project have .py file as follows:
 8:/opt/Nhids/nhids/redis_queue.py, row_nums:35
 
 The total code numbers is 239
+
 The total file numbers is:8
 
 ------------------------------------------------
