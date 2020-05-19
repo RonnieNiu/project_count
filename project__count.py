@@ -49,6 +49,7 @@ if  __name__ == "__main__":
 
     try:
         result = list(map(lambda x:(x,int(os.popen(cad % x).read().strip("\n"))), total(base_path,lang)))
+        result.sort(key=lambda x:x[1])
         print("\nThe %s project have %s file as follows:\n"%(base_path,lang))
         for index in range(len(result)):
             print("%d:%s, row_nums:%d"%(index+1,result[index][0],result[index][1]))
