@@ -13,6 +13,7 @@ import threading
 import time
 import sys
 import datetime
+import os
 import functools
 from multiprocessing import Process, Pool, cpu_count
 
@@ -51,11 +52,11 @@ def _run(ip):
         print(e)
         pass
 
-"""
+
 #(((######################################################################################################
 #多线程实现(
 #用semaphore 控制线程数量
-sem = threading.Semaphore(20)
+sem = threading.Semaphore(50)
 
 def run_threats(ip):
     _run(ip)
@@ -63,8 +64,6 @@ def run_threats(ip):
 
 @_run_time
 def start_threads(ip_list):
-    print("----------main thread---- {0}:".format(threading.current_thread().name))
-
     thread_list = [threading.Thread(target=run_threats, args=(ip,)) for ip in ip_list]
     for t in thread_list:
         sem.acquire()
@@ -73,26 +72,29 @@ def start_threads(ip_list):
 
     for t in thread_list:
         t.join()
-    print('---------main thread ------:', threading.current_thread().name)
+    print("----------main thread---- {0}: ，属于进程 ；l{1}".format(threading.current_thread().name, os.getpid()))
 ######################################################################################################)))
-"""
-
-"""
-#(((#####################################################################################################
-#三方库gevent 实现协程
-@_run_time
-def start_gevent(ip_list):
-    greenlets = [gevent.spawn(_run, ip) for ip in ip_list]
-    gevent.joinall(greenlets=greenlets)
-######################################################################################################)))
-"""
-
 
 """
 #(((############################################################################################
-#多进程实现
+#多进程+多线程实现
 @_run_time
-def start_process(ip_list):
+def start_process(ip_lists):
+    # 方法一: 使用Pool进程池方式创建子进程，这是多进程+多线程实现
+    pool = Pool(cpu_count())
+    for ip_list in ip_lists:
+        pool.apply_async(start_threads,args=(ip_list,))
+
+    pool.close()
+    pool.join() #使用Pool方法创建时，记得一定调用join()使主进程等待子进程结束后在结束，否则子进程不会执行
+###############################################################################################)))
+""""
+
+"""
+#多进程实现
+#(((#############################################################################################
+@_run_time
+def start_process(ip_lists):
     # 方法一: 使用Pool进程池方式创建子进程
     pool = Pool(cpu_count())
     for ip in ip_list:
@@ -110,6 +112,16 @@ def start_process(ip_list):
     #     each_p.join()
 
 ###############################################################################################)))
+"""
+
+"""
+#(((#####################################################################################################
+#三方库gevent 实现协程
+@_run_time
+def start_gevent(ip_list):
+    greenlets = [gevent.spawn(_run, ip) for ip in ip_list]
+    gevent.joinall(greenlets=greenlets)
+######################################################################################################)))
 """
 
 """
@@ -147,12 +159,14 @@ def main_coroutine(ip_list):
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage:python %s ip_445.txt"%sys.argv[0])
-        main_coroutine(_get_ip("10.99.0.0_445.txt".split("_")[0] + "_445.txt"))
+        # main_coroutine(_get_ip("10.99.0.0_445.txt".split("_")[0] + "_445.txt"))
+        start_process([_get_ip("10.99.0.0_445.txt".split("_")[0] + "_445.txt"),_get_ip("10.101.0.0_445.txt".split("_")[0] + "_445.txt"),_get_ip("10.130.0.0_445.txt".split("_")[0] + "_445.txt")])
         # sys.exit()
 
     # start_threads(_get_ip(sys.argv[1].split("_")[0] + "_445.txt"))
 
     #start_gevent(_get_ip(sys.argv[1].split("_")[0] + "_445.txt"))
+
 
 
 
